@@ -1,0 +1,36 @@
+micronaut:
+  io:
+    watch:
+      paths: src/main
+      restart: true
+  application:
+    name: kestrel-example
+
+jackson:
+  property_naming_strategy: SNAKE_CASE
+
+database:
+  host: ${DB_HOST:example-db}
+  name: ${DB_NAME:postgres}
+  username: ${DB_USERNAME:postgres}
+  password: ${DB_PASSWORD:password}
+
+contexts:
+  users:
+    protocol: http
+    host: example
+    port: 8080
+    path: /events
+    subscriptions:
+    - name: hello-new-user
+      batch_size: 10
+      repeat_schedule: 5000
+      timeout: 10000
+      enabled: true
+      ignore_unrecognised_events: true
+    - name: warn-user-locked
+      batch_size: 10
+      repeat_schedule: 5000
+      timeout: 10000
+      enabled: true
+      ignore_unrecognised_events: true

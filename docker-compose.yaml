@@ -1,0 +1,32 @@
+version: '2'
+services:
+  example:
+    image: adoptopenjdk/openjdk11-openj9:jdk-11.0.1.13-alpine-slim
+    working_dir: /src
+    command: ./gradlew run --continuous
+    volumes:
+      - '.:/src'
+      - '/src/build/'
+      - '/src/.gradle'
+      - 'gradle-cache:/root/.gradle/caches/modules-2/files-2.1/'
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+    restart: always
+    privileged: true
+    stdin_open: true
+    tty: true
+  example-db:
+    image: postgres:9.6-alpine
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=password
+  pg-admin:
+    image: thajeztah/pgadmin4
+    restart: always
+    ports:
+      - "5050:5050"
+volumes:
+  gradle-cache:

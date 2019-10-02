@@ -1,0 +1,5 @@
+profile: service
+defaultPackage: kestrel.example
+---
+testFramework: kotlintest
+sourceLanguage: kotlin
