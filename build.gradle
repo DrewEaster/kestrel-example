@@ -24,6 +24,7 @@ repositories {
         name "spring-milestones"
         url  "https://repo.spring.io/milestone"
     }
+
 }
 
 configurations {
@@ -33,6 +34,7 @@ configurations {
 
 dependencies {
     implementation platform("io.micronaut:micronaut-bom:$micronautVersion")
+    implementation platform("io.r2dbc:r2dbc-bom:Arabba-SR2")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
     implementation "org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}"
     implementation "io.micronaut:micronaut-runtime"
@@ -42,10 +44,10 @@ dependencies {
     implementation "com.dreweaster.ddd:kestrel-http-event-source:$kestrelVersion"
     implementation "com.dreweaster.ddd:kestrel-rdbms:$kestrelVersion"
     implementation "com.dreweaster.ddd:kestrel-json:$kestrelVersion"
-    implementation "io.r2dbc:r2dbc-spi:0.8.0.M8"
-    implementation "io.r2dbc:r2dbc-postgresql:0.8.0.M8"
-    implementation "io.r2dbc:r2dbc-client:0.8.0.M8"
-    implementation "io.r2dbc:r2dbc-pool:0.8.0.M8"
+    implementation "io.r2dbc:r2dbc-spi"
+    implementation "io.r2dbc:r2dbc-postgresql"
+    implementation "io.r2dbc:r2dbc-client:0.8.0.RC2"
+    implementation "io.r2dbc:r2dbc-pool"
     implementation "org.flywaydb:flyway-core:4.2.0"
     implementation "org.postgresql:postgresql:9.4.1212"
     implementation "io.projectreactor.addons:reactor-adapter:3.2.3.RELEASE"

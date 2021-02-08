@@ -1,5 +1,6 @@
 package kestrel.example.infrastructure.driven.readmodel.user
 
+import com.dreweaster.ddd.kestrel.domain.Persistable
 import com.dreweaster.ddd.kestrel.infrastructure.rdbms.ConsistentDatabaseProjection
 import com.dreweaster.ddd.kestrel.infrastructure.rdbms.Database
 import com.dreweaster.ddd.kestrel.infrastructure.rdbms.ResultRow
@@ -9,6 +10,49 @@ import kestrel.example.domain.aggregates.user.*
 
 import reactor.core.publisher.Mono
 import javax.inject.Singleton
+
+interface AggregatePublicEventContractState: Persistable
+interface AggregatePublicEventContractEvent: Persistable
+interface AggregatePublicEventContract<E: AggregatePublicEventContractEvent, S: AggregatePublicEventContractState>
+
+sealed class UserPublicEventContractEvent: AggregatePublicEventContractEvent
+data class UserAccountLocked(val username: String): UserPublicEventContractEvent()
+
+data class UserPublicEventContractState(
+        val username: String = "",
+        val password: String = "",
+        val locked: Boolean = false): AggregatePublicEventContractState
+
+object UserPublicEventContract: AggregatePublicEventContract<UserPublicEventContractEvent, UserPublicEventContractState>
+
+class UserEventContractPublisher : AggregatePublicEventContractPublisher<User, UserEvent, UserPublicEventContract> {
+
+    val initialState = UserPublicEventContractState()
+
+    val handleEvent = publisher {
+
+        event<UserRegistered> {
+            update { event, state -> state.copy(username = event.username, password = event.password) }
+        }
+
+        event<UsernameChanged> {
+            update { event, state -> state.copy(username = event.username) }
+        }
+
+        event<PasswordChanged> {
+            update { event, state -> state.copy(password = event.password) }
+        }
+
+        event<UserLocked> {
+            update { event, state -> state.copy(locked = true) }
+            publish { state -> UserAccountLocked(state.username) }
+        }
+
+        event<UserUnlocked> {
+            update { event, state -> state.copy(locked = false) }
+        }
+    }
+}
 
 @Singleton
 class ConsistentUserProjection constructor(private val database: Database): ConsistentDatabaseProjection(), UserReadModel {

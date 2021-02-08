@@ -3,7 +3,7 @@ package kestrel.example.infrastructure
 import com.dreweaster.ddd.kestrel.application.*
 import com.dreweaster.ddd.kestrel.application.offset.OffsetTracker
 import com.dreweaster.ddd.kestrel.application.scheduling.Scheduler
-import com.dreweaster.ddd.kestrel.domain.AggregateData
+import com.dreweaster.ddd.kestrel.domain.*
 import com.dreweaster.ddd.kestrel.infrastructure.cluster.LocalCluster
 import com.dreweaster.ddd.kestrel.infrastructure.driven.backend.mapper.json.JsonMapper
 import com.dreweaster.ddd.kestrel.infrastructure.driven.backend.mapper.json.JsonMappingContext
@@ -65,18 +65,26 @@ internal class BeanFactory {
     }
 
     @Singleton
-    fun aggregateDataMappingContext(jsonMappers: List<JsonMapper<*>>): AggregateDataMappingContext {
-        return JsonMappingContext(jsonMappers as List<JsonMapper<AggregateData>>)
+    fun aggregateDataMappingContext(jsonMappers: List<JsonMapper<*>>): JsonMappingContext {
+        return JsonMappingContext(jsonMappers as List<JsonMapper<Persistable>>)
     }
 
     @Singleton
-    fun backend(database: Database, mappingContext: AggregateDataMappingContext, readModels: List<ConsistentDatabaseProjection>): Backend {
+    fun backend(database: Database, mappingContext: JsonMappingContext, readModels: List<ConsistentDatabaseProjection>): Backend {
         return PostgresBackend(database, mappingContext, readModels)
     }
 
     @Singleton
-    fun domainModel(backend: Backend): DomainModel {
-        return EventSourcedDomainModel(backend, TwentyFourHourWindowCommandDeduplication)
+    fun eventSourcingConfiguration(): EventSourcingConfiguration {
+        return object : EventSourcingConfiguration {
+            override fun <E : DomainEvent, S : AggregateState, A : Aggregate<*, E, S>> commandDeduplicationThresholdFor(aggregateType: Aggregate<*, E, S>) = 100
+            override fun <E : DomainEvent, S : AggregateState, A : Aggregate<*, E, S>> snapshotThresholdFor(aggregateType: Aggregate<*, E, S>) = 5
+        }
+    }
+
+    @Singleton
+    fun domainModel(backend: Backend, eventSourcingConfiguration: EventSourcingConfiguration): DomainModel {
+        return EventSourcedDomainModel(backend, eventSourcingConfiguration)
     }
 
     @Bean(preDestroy = "shutdown")
