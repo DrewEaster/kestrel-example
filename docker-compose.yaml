@@ -1,7 +1,7 @@
 version: '2'
 services:
   example:
-    image: adoptopenjdk/openjdk11-openj9:jdk-11.0.1.13-alpine-slim
+    image: openjdk:11-slim
     working_dir: /src
     command: ./gradlew run --continuous
     volumes:
@@ -19,14 +19,12 @@ services:
   example-db:
     image: postgres:9.6-alpine
     restart: always
-    ports:
-      - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=password
   pg-admin:
     image: thajeztah/pgadmin4
     restart: always
     ports:
-      - "5050:5050"
+      - "5151:5050"
 volumes:
   gradle-cache:

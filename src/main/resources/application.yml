@@ -22,13 +22,13 @@ contexts:
     port: 8080
     path: /events
     subscriptions:
-    - name: hello-new-user
+    - name: hello-new-user_user-events
       batch_size: 10
       repeat_schedule: 5000
       timeout: 10000
       enabled: true
       ignore_unrecognised_events: true
-    - name: warn-user-locked
+    - name: warn-user-locked_user-events
       batch_size: 10
       repeat_schedule: 5000
       timeout: 10000

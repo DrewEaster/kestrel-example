@@ -1,14 +1,14 @@
 package kestrel.example.infrastructure.driving.eventsource
 
-import com.dreweaster.ddd.kestrel.application.AggregateDataMappingContext
-import com.dreweaster.ddd.kestrel.domain.AggregateData
+import com.dreweaster.ddd.kestrel.domain.Persistable
+import com.dreweaster.ddd.kestrel.infrastructure.driven.backend.mapper.json.JsonMappingContext
 import kestrel.example.domain.aggregates.user.*
 import com.dreweaster.ddd.kestrel.infrastructure.http.eventsource.consumer.BoundedContextHttpEventSourceFactory
 import kestrel.example.application.BoundedContexts.UserContext
 import javax.inject.Singleton
 
 @Singleton
-class UserContextHttpEventSourceFactory(private val userContextAggregateDataMappingContext: AggregateDataMappingContext): BoundedContextHttpEventSourceFactory(UserContext) {
+class UserContextHttpEventSourceFactory(private val userContextAggregateDataMappingContext: JsonMappingContext): BoundedContextHttpEventSourceFactory(UserContext) {
 
     override val deserialisers = eventDeserialisers {
 
@@ -40,7 +40,7 @@ class UserContextHttpEventSourceFactory(private val userContextAggregateDataMapp
         }
     }
 
-    private fun <Data : AggregateData> mappingContextDeserialiser(): (String, String, Int) -> Data = { payload, type, version ->
+    private fun <Data : Persistable> mappingContextDeserialiser(): (String, String, Int) -> Data = { payload, type, version ->
         userContextAggregateDataMappingContext.deserialise(payload, type, version)
     }
 }

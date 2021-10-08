@@ -1,3 +1,3 @@
-FROM adoptopenjdk/openjdk11-openj9:jdk-11.0.1.13-alpine-slim
+FROM openjdk:11-slim
 EXPOSE 8080
 CMD ./gradlew run --continuous
