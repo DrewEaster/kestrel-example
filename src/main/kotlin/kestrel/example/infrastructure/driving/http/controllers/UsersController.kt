@@ -4,11 +4,12 @@ import com.dreweaster.ddd.kestrel.application.*
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpResponse.*
 import io.micronaut.http.HttpStatus.*
-
 import io.micronaut.http.MediaType.*
 import io.micronaut.http.annotation.*
 import kestrel.example.application.readmodel.user.UserDTO
 import kestrel.example.application.readmodel.user.UserReadModel
+import kestrel.example.domain.aggregates.user.ActiveUser
+import kestrel.example.domain.aggregates.user.LockedUser
 import kestrel.example.domain.aggregates.user.RegisterUser
 import kestrel.example.domain.aggregates.user.User
 import reactor.core.publisher.Mono
@@ -41,7 +42,15 @@ class UsersController @Inject constructor(private val domainModel: DomainModel, 
     }
 
     @Get("/{id}", produces = [APPLICATION_JSON])
-    fun findUserById(@PathVariable id: String): Mono<UserDTO> {
-        return readModel.findUserById(id)
+    fun findUserById(@PathVariable id: String, @QueryValue version: Long?): Mono<UserDTO> {
+        return version?.let {
+            domainModel.aggregateRootOf(User, AggregateId(id)).stateAt(it)
+                .map { userState ->
+                    when(userState) {
+                        is ActiveUser -> UserDTO(id, userState.username, userState.password, false)
+                        is LockedUser -> UserDTO(id, userState.username, userState.password, true)
+                    }
+                }
+        } ?: readModel.findUserById(id)
     }
 }
